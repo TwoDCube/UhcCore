@@ -9,40 +9,40 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-public class TeleportPlayersThread implements Runnable{
+public class TeleportPlayersThread implements Runnable {
 
-	private final GameManager gameManager;
-	private final UhcTeam team;
-	
-	public TeleportPlayersThread(GameManager gameManager, UhcTeam team) {
-		this.gameManager = gameManager;
-		this.team = team;
-	}
+    private final GameManager gameManager;
+    private final UhcTeam team;
 
-	@Override
-	public void run() {
-		
-		for(UhcPlayer uhcPlayer : team.getMembers()){
-			Player player;
-			try {
-				player = uhcPlayer.getPlayer();
-			}catch (UhcPlayerNotOnlineException ex){
-				continue;
-			}
+    public TeleportPlayersThread(GameManager gameManager, UhcTeam team) {
+        this.gameManager = gameManager;
+        this.team = team;
+    }
 
-			Bukkit.getLogger().info("[UhcCore] Teleporting "+player.getName());
+    @Override
+    public void run() {
 
-			for(PotionEffect effect : gameManager.getConfiguration().getPotionEffectOnStart()){
-				player.addPotionEffect(effect);
-			}
+        for (UhcPlayer uhcPlayer : team.getMembers()) {
+            Player player;
+            try {
+                player = uhcPlayer.getPlayer();
+            } catch (UhcPlayerNotOnlineException ex) {
+                continue;
+            }
 
-			uhcPlayer.freezePlayer(team.getStartingLocation());
-			player.teleport(team.getStartingLocation());
-			player.removePotionEffect(PotionEffectType.BLINDNESS);
-			player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
-			player.setFireTicks(0);
-			uhcPlayer.setHasBeenTeleportedToLocation(true);
-		}
-	}
+            Bukkit.getLogger().info("[UhcCore] Teleporting " + player.getName());
+
+            for (PotionEffect effect : gameManager.getConfiguration().getPotionEffectOnStart()) {
+                player.addPotionEffect(effect);
+            }
+
+            uhcPlayer.freezePlayer(team.getStartingLocation());
+            player.teleport(team.getStartingLocation());
+            player.removePotionEffect(PotionEffectType.BLINDNESS);
+            player.removePotionEffect(PotionEffectType.SLOW_DIGGING);
+            player.setFireTicks(0);
+            uhcPlayer.setHasBeenTeleportedToLocation(true);
+        }
+    }
 
 }

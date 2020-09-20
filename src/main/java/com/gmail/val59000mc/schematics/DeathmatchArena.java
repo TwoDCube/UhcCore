@@ -17,151 +17,150 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DeathmatchArena{
+public class DeathmatchArena {
 
-	private final Location loc;
-	private boolean enable, built;
-	private List<Location> teleportSpots;
-	private File arenaSchematic;
-	protected static int width, length, height;
-	
-	public DeathmatchArena(Location loc){
-		this.loc = loc;
-		enable = true;
-		built = false;
+    protected static int width, length, height;
+    private final Location loc;
+    private boolean enable, built;
+    private List<Location> teleportSpots;
+    private File arenaSchematic;
 
-		teleportSpots = new ArrayList<>();
-		teleportSpots.add(loc);
+    public DeathmatchArena(Location loc) {
+        this.loc = loc;
+        enable = true;
+        built = false;
 
-		checkIfSchematicCanBePasted(); 
-	}
-	
-	private void checkIfSchematicCanBePasted() {
-		if(GameManager.getGameManager().getConfiguration().getWorldEditLoaded()){
-			arenaSchematic = SchematicHandler.getSchematicFile("arena");
-        	if(!arenaSchematic.exists()){
-				enable = false;
-				Bukkit.getLogger().info("[UhcCore] Arena schematic not found in 'plugins/UhcCore/arena.schematic'. There will be a deathmatch at 0 0.");
-        	}
-		}else{
-			Bukkit.getLogger().info("[UhcCore] No WorldEdit installed so ending with deathmatch at 0 0");
-			enable = false;
-		}
-	}
+        teleportSpots = new ArrayList<>();
+        teleportSpots.add(loc);
 
-	public void build(){
-		if(enable){
-			if(!built){
-				
-				ArrayList<Integer> dimensions;
-				try {
-					dimensions = SchematicHandler.pasteSchematic(loc, arenaSchematic, 3);
-					DeathmatchArena.height = dimensions.get(0);
-					DeathmatchArena.length = dimensions.get(1);
-					DeathmatchArena.width = dimensions.get(2);
-					built = true;
-				} catch (Exception e) {
-					Bukkit.getLogger().severe("[UhcCore] An error ocurred while pasting the arena");
-					e.printStackTrace();
-					built = false;
-				}
-			}  
-				
-			if(built){
-				calculateTeleportSpots();
-			}else{
-				Bukkit.getLogger().severe("[UhcCore] Deathmatch will be at 0 0 as the arena could not be pasted.");
-				enable = false;
-			}
-		}
-	}
+        checkIfSchematicCanBePasted();
+    }
 
-	public Location getLoc() {
-		return loc;
-	}
+    private void checkIfSchematicCanBePasted() {
+        if (GameManager.getGameManager().getConfiguration().getWorldEditLoaded()) {
+            arenaSchematic = SchematicHandler.getSchematicFile("arena");
+            if (!arenaSchematic.exists()) {
+                enable = false;
+                Bukkit.getLogger().info("[UhcCore] Arena schematic not found in 'plugins/UhcCore/arena.schematic'. There will be a deathmatch at 0 0.");
+            }
+        } else {
+            Bukkit.getLogger().info("[UhcCore] No WorldEdit installed so ending with deathmatch at 0 0");
+            enable = false;
+        }
+    }
 
-	public boolean isUsed() {
-		return enable;
-	}
+    public void build() {
+        if (enable) {
+            if (!built) {
 
-	public int getMaxSize() {
-		return Math.max(DeathmatchArena.length, DeathmatchArena.width);
-	}
-	
-	public void calculateTeleportSpots(){
-		YamlFile storage;
+                ArrayList<Integer> dimensions;
+                try {
+                    dimensions = SchematicHandler.pasteSchematic(loc, arenaSchematic, 3);
+                    DeathmatchArena.height = dimensions.get(0);
+                    DeathmatchArena.length = dimensions.get(1);
+                    DeathmatchArena.width = dimensions.get(2);
+                    built = true;
+                } catch (Exception e) {
+                    Bukkit.getLogger().severe("[UhcCore] An error ocurred while pasting the arena");
+                    e.printStackTrace();
+                    built = false;
+                }
+            }
 
-		try{
-			storage = FileUtils.saveResourceIfNotAvailable("storage.yml", true);
-		}catch (InvalidConfigurationException ex){
-			ex.printStackTrace();
-			return;
-		}
+            if (built) {
+                calculateTeleportSpots();
+            } else {
+                Bukkit.getLogger().severe("[UhcCore] Deathmatch will be at 0 0 as the arena could not be pasted.");
+                enable = false;
+            }
+        }
+    }
 
-		long spotsDate = storage.getLong("arena.last-edit", -1);
+    public Location getLoc() {
+        return loc;
+    }
 
-		List<Location> spots = new ArrayList<>();
-		List<Vector> vectorSpots = new ArrayList<>();
+    public boolean isUsed() {
+        return enable;
+    }
 
-		if (spotsDate == arenaSchematic.lastModified()){
-			Bukkit.getLogger().info("[UhcCore] Loading stored arena teleport spots.");
+    public int getMaxSize() {
+        return Math.max(DeathmatchArena.length, DeathmatchArena.width);
+    }
 
-			vectorSpots = (ArrayList<Vector>) storage.get("arena.locations");
+    public void calculateTeleportSpots() {
+        YamlFile storage;
 
-			for (Vector vector : vectorSpots){
-				spots.add(vector.toLocation(loc.getWorld()));
-			}
-		}
-		else{
+        try {
+            storage = FileUtils.saveResourceIfNotAvailable("storage.yml", true);
+        } catch (InvalidConfigurationException ex) {
+            ex.printStackTrace();
+            return;
+        }
 
-			int x = loc.getBlockX(),
-					y = loc.getBlockY(),
-					z = loc.getBlockZ();
+        long spotsDate = storage.getLong("arena.last-edit", -1);
 
-			Material spotMaterial = GameManager.getGameManager().getConfiguration().getArenaTeleportSpotBLock();
+        List<Location> spots = new ArrayList<>();
+        List<Vector> vectorSpots = new ArrayList<>();
 
-			Bukkit.getLogger().info("[UhcCore] Scanning schematic for arena teleport spots.");
+        if (spotsDate == arenaSchematic.lastModified()) {
+            Bukkit.getLogger().info("[UhcCore] Loading stored arena teleport spots.");
 
-			for (int i = x - width; i < x + width; i++) {
-				for (int j = y - height; j < y + height; j++) {
-					for (int k = z - length; k < z + length; k++) {
-						Block block = loc.getWorld().getBlockAt(i, j, k);
-						if (block.getType().equals(spotMaterial)) {
-							spots.add(block.getLocation().clone().add(0.5, 1, 0.5));
-							vectorSpots.add(block.getLocation().clone().add(0.5, 1, 0.5).toVector());
-							Bukkit.getLogger().info("[UhcCore] Arena teleport spot found at " + i + " " + (j + 1) + " " + k);
-						}
-					}
-				}
-			}
+            vectorSpots = (ArrayList<Vector>) storage.get("arena.locations");
 
-			storage.set("arena.last-edit", arenaSchematic.lastModified());
-			storage.set("arena.locations", vectorSpots);
-			try {
-				storage.save();
-			}catch (IOException ex){
-				ex.printStackTrace();
-			}
-		}
+            for (Vector vector : vectorSpots) {
+                spots.add(vector.toLocation(loc.getWorld()));
+            }
+        } else {
 
-		if(spots.isEmpty()){
-			Bukkit.getLogger().info("[UhcCore] No Arena teleport spot found, defaulting to schematic origin");
-		}else{
-			Collections.shuffle(spots);
-			teleportSpots = spots;
-		}
-	}
-	
-	public List<Location> getTeleportSpots(){
-		return teleportSpots;
-	}
+            int x = loc.getBlockX(),
+                    y = loc.getBlockY(),
+                    z = loc.getBlockZ();
 
-	public void loadChunks(){
-		if(enable){
-			World world = getLoc().getWorld();
-			for(Location loc : teleportSpots){
-				world.loadChunk(loc.getChunk());
-			}
-		}
-	}
+            Material spotMaterial = GameManager.getGameManager().getConfiguration().getArenaTeleportSpotBLock();
+
+            Bukkit.getLogger().info("[UhcCore] Scanning schematic for arena teleport spots.");
+
+            for (int i = x - width; i < x + width; i++) {
+                for (int j = y - height; j < y + height; j++) {
+                    for (int k = z - length; k < z + length; k++) {
+                        Block block = loc.getWorld().getBlockAt(i, j, k);
+                        if (block.getType().equals(spotMaterial)) {
+                            spots.add(block.getLocation().clone().add(0.5, 1, 0.5));
+                            vectorSpots.add(block.getLocation().clone().add(0.5, 1, 0.5).toVector());
+                            Bukkit.getLogger().info("[UhcCore] Arena teleport spot found at " + i + " " + (j + 1) + " " + k);
+                        }
+                    }
+                }
+            }
+
+            storage.set("arena.last-edit", arenaSchematic.lastModified());
+            storage.set("arena.locations", vectorSpots);
+            try {
+                storage.save();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        if (spots.isEmpty()) {
+            Bukkit.getLogger().info("[UhcCore] No Arena teleport spot found, defaulting to schematic origin");
+        } else {
+            Collections.shuffle(spots);
+            teleportSpots = spots;
+        }
+    }
+
+    public List<Location> getTeleportSpots() {
+        return teleportSpots;
+    }
+
+    public void loadChunks() {
+        if (enable) {
+            World world = getLoc().getWorld();
+            for (Location loc : teleportSpots) {
+                world.loadChunk(loc.getChunk());
+            }
+        }
+    }
 }

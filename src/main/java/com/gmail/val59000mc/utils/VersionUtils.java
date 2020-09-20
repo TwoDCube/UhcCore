@@ -29,22 +29,22 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class VersionUtils{
+public abstract class VersionUtils {
 
     private static VersionUtils versionUtils = null;
 
-    public static VersionUtils getVersionUtils(){
-        if (versionUtils == null){
+    public static VersionUtils getVersionUtils() {
+        if (versionUtils == null) {
             int version = UhcCore.getVersion();
-            if (version < 12){
+            if (version < 12) {
                 versionUtils = new VersionUtils_1_8();
-            }else if (version == 12){
+            } else if (version == 12) {
                 versionUtils = new VersionUtils_1_12();
-            }else if (version == 13){
+            } else if (version == 13) {
                 versionUtils = new VersionUtils_1_13();
-            }else if (version == 14){
+            } else if (version == 14) {
                 versionUtils = new VersionUtils_1_14();
-            }else{
+            } else {
                 versionUtils = new VersionUtils_1_15();
             }
         }
@@ -87,8 +87,9 @@ public abstract class VersionUtils{
 
     /**
      * Sets the side of a chest. (Used for double chests)
+     *
      * @param chest The chest you want to change the side for.
-     * @param left If true it's changed to a left chest, false means it will be changed to a right chest.
+     * @param left  If true it's changed to a left chest, false means it will be changed to a right chest.
      */
     public abstract void setChestSide(Chest chest, boolean left);
 

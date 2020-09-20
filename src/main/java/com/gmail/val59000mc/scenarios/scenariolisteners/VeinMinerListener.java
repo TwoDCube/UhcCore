@@ -13,7 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class VeinMinerListener extends ScenarioListener{
+public class VeinMinerListener extends ScenarioListener {
 
     private static final BlockFace[] BLOCK_FACES = new BlockFace[]{
             BlockFace.DOWN,
@@ -25,21 +25,21 @@ public class VeinMinerListener extends ScenarioListener{
     };
 
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent e){
+    public void onBlockBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
 
-        if (!player.isSneaking()){
+        if (!player.isSneaking()) {
             return;
         }
 
         Block block = e.getBlock();
         ItemStack tool = player.getItemInHand();
 
-        if (block.getType() == UniversalMaterial.GLOWING_REDSTONE_ORE.getType()){
+        if (block.getType() == UniversalMaterial.GLOWING_REDSTONE_ORE.getType()) {
             block.setType(Material.REDSTONE_ORE);
         }
 
-        if (!UniversalMaterial.isCorrectTool(block.getType(), player.getItemInHand().getType())){
+        if (!UniversalMaterial.isCorrectTool(block.getType(), player.getItemInHand().getType())) {
             return;
         }
 
@@ -47,74 +47,74 @@ public class VeinMinerListener extends ScenarioListener{
         Vein vein = new Vein(block);
         vein.process();
 
-        player.getWorld().dropItem(player.getLocation().getBlock().getLocation().add(.5,.5,.5), vein.getDrops(getVeinMultiplier(vein.getDropType())));
+        player.getWorld().dropItem(player.getLocation().getBlock().getLocation().add(.5, .5, .5), vein.getDrops(getVeinMultiplier(vein.getDropType())));
 
-        if (vein.getTotalXp() != 0){
+        if (vein.getTotalXp() != 0) {
             UhcItems.spawnExtraXp(player.getLocation(), vein.getTotalXp());
         }
 
         // Process blood diamonds.
-        if (isActivated(Scenario.BLOODDIAMONDS) && vein.getDropType() == Material.DIAMOND){
+        if (isActivated(Scenario.BLOODDIAMONDS) && vein.getDropType() == Material.DIAMOND) {
             player.getWorld().playSound(player.getLocation(), UniversalSound.PLAYER_HURT.getSound(), 1, 1);
 
-            if (player.getHealth() < vein.getOres()){
+            if (player.getHealth() < vein.getOres()) {
                 player.setHealth(0);
-            }else {
+            } else {
                 player.setHealth(player.getHealth() - vein.getOres());
             }
         }
 
-        int newDurability = tool.getDurability()-vein.getOres();
-        if (newDurability<1) newDurability = 1;
+        int newDurability = tool.getDurability() - vein.getOres();
+        if (newDurability < 1) newDurability = 1;
 
         tool.setDurability((short) newDurability);
         player.setItemInHand(tool);
     }
 
-    private int getVeinMultiplier(Material material){
+    private int getVeinMultiplier(Material material) {
         int multiplier = 1;
-        if (getScenarioManager().isActivated(Scenario.TRIPLEORES)){
+        if (getScenarioManager().isActivated(Scenario.TRIPLEORES)) {
             multiplier *= 3;
         }
-        if (getScenarioManager().isActivated(Scenario.DOUBLEORES)){
+        if (getScenarioManager().isActivated(Scenario.DOUBLEORES)) {
             multiplier *= 2;
         }
-        if (material == Material.GOLD_INGOT && getScenarioManager().isActivated(Scenario.DOUBLEGOLD)){
+        if (material == Material.GOLD_INGOT && getScenarioManager().isActivated(Scenario.DOUBLEGOLD)) {
             multiplier *= 2;
         }
         return multiplier;
     }
 
-    private static class Vein{
+    private static class Vein {
         private final Block startBlock;
         private int ores;
 
-        public Vein(Block startBlock){
+        public Vein(Block startBlock) {
             this.startBlock = startBlock;
             ores = 0;
         }
 
-        public void process(){
+        public void process() {
             getVeinBlocks(startBlock, startBlock.getType(), 2, 10);
         }
 
-        public ItemStack getDrops(){
+        public ItemStack getDrops() {
             return getDrops(1);
         }
 
-        public ItemStack getDrops(int multiplier){
+        public ItemStack getDrops(int multiplier) {
             Material material = getDropType();
             if (material == null) return null;
 
-            if (material == Material.LAPIS_ORE){
-                return UniversalMaterial.LAPIS_LAZULI.getStack(ores*multiplier);
+            if (material == Material.LAPIS_ORE) {
+                return UniversalMaterial.LAPIS_LAZULI.getStack(ores * multiplier);
             }
 
-            return new ItemStack(material, ores*multiplier);
+            return new ItemStack(material, ores * multiplier);
         }
 
-        public int getTotalXp(){
-            return getXpPerBlock()*ores;
+        public int getTotalXp() {
+            return getXpPerBlock() * ores;
         }
 
         public int getOres() {
@@ -124,32 +124,32 @@ public class VeinMinerListener extends ScenarioListener{
         private void getVeinBlocks(Block block, Material type, int i, int maxBlocks) {
             if (maxBlocks == 0) return;
 
-            if (block.getType() == UniversalMaterial.GLOWING_REDSTONE_ORE.getType()){
+            if (block.getType() == UniversalMaterial.GLOWING_REDSTONE_ORE.getType()) {
                 block.setType(Material.REDSTONE_ORE);
             }
 
-            if (block.getType() == type){
+            if (block.getType() == type) {
                 block.setType(Material.AIR);
                 ores++;
                 i = 2;
-            }else {
+            } else {
                 i--;
             }
-            
+
             // Max ores per vein is 20 to avoid server lag when mining sand / gravel.
-            if (i > 0 && ores < 20){
+            if (i > 0 && ores < 20) {
                 for (BlockFace face : BLOCK_FACES) {
-                    getVeinBlocks(block.getRelative(face), type, i, maxBlocks-1);
+                    getVeinBlocks(block.getRelative(face), type, i, maxBlocks - 1);
                 }
             }
         }
 
-        private Material getDropType(){
-            if (startBlock.getType() == UniversalMaterial.NETHER_QUARTZ_ORE.getType()){
+        private Material getDropType() {
+            if (startBlock.getType() == UniversalMaterial.NETHER_QUARTZ_ORE.getType()) {
                 return Material.QUARTZ;
             }
 
-            switch (startBlock.getType()){
+            switch (startBlock.getType()) {
                 case DIAMOND_ORE:
                     return Material.DIAMOND;
                 case GOLD_ORE:
@@ -170,12 +170,12 @@ public class VeinMinerListener extends ScenarioListener{
             return null;
         }
 
-        private int getXpPerBlock(){
-            if (startBlock.getType() == UniversalMaterial.NETHER_QUARTZ_ORE.getType()){
+        private int getXpPerBlock() {
+            if (startBlock.getType() == UniversalMaterial.NETHER_QUARTZ_ORE.getType()) {
                 return 3;
             }
 
-            switch (startBlock.getType()){
+            switch (startBlock.getType()) {
                 case DIAMOND_ORE:
                     return 3;
                 case GOLD_ORE:

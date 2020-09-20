@@ -5,11 +5,11 @@ import com.gmail.val59000mc.utils.VersionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 
-public class EnablePermanentDayThread implements Runnable{
+public class EnablePermanentDayThread implements Runnable {
 
     private final MainConfiguration configuration;
 
-    public EnablePermanentDayThread(MainConfiguration configuration){
+    public EnablePermanentDayThread(MainConfiguration configuration) {
         this.configuration = configuration;
     }
 

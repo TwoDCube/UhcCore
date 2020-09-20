@@ -6,16 +6,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class HasteyBoysListener extends ScenarioListener{
+public class HasteyBoysListener extends ScenarioListener {
 
     @EventHandler
-    public void onPlayerCraft(CraftItemEvent e){
+    public void onPlayerCraft(CraftItemEvent e) {
         ItemStack item = e.getCurrentItem();
 
         try {
-            item.addEnchantment(Enchantment.DIG_SPEED,3);
-            item.addEnchantment(Enchantment.DURABILITY,1);
-        }catch (IllegalArgumentException ex){
+            item.addEnchantment(Enchantment.DIG_SPEED, 3);
+            item.addEnchantment(Enchantment.DURABILITY, 1);
+        } catch (IllegalArgumentException ex) {
             // Nothing
         }
 

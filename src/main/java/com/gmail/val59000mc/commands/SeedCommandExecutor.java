@@ -7,23 +7,23 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-public class SeedCommandExecutor implements CommandExecutor{
+public class SeedCommandExecutor implements CommandExecutor {
 
-    private MainConfiguration configuration;
+    private final MainConfiguration configuration;
 
-    public SeedCommandExecutor(MainConfiguration configuration){
+    public SeedCommandExecutor(MainConfiguration configuration) {
         this.configuration = configuration;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         World world = Bukkit.getWorld(configuration.getOverworldUuid());
-        if (world == null){
+        if (world == null) {
             sender.sendMessage("Please wait for the game to fully load.");
             return true;
         }
 
-        sender.sendMessage("["+world.getSeed()+"]");
+        sender.sendMessage("[" + world.getSeed() + "]");
         return true;
     }
 

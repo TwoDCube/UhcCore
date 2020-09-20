@@ -3,7 +3,7 @@ main: com.gmail.val59000mc.UhcCore
 version: @version@
 description: Automates UHC games on a dedicated server
 author: val59000mc, Mezy
-softdepend: [WorldEdit,Vault,ProtocolLib]
+softdepend: [ WorldEdit,Vault,ProtocolLib ]
 api-version: 1.13
 commands:
   uhccore:
@@ -12,11 +12,11 @@ commands:
   chat:
     description: "Type '/chat' to toggle global chat"
     usage: "/chat"
-    aliases: [c]
+    aliases: [ c ]
   teleport:
     description: "Type '/teleport <player>' to teleport to your teammates while spectating"
     usage: "/teleport <player>"
-    aliases: [tp]
+    aliases: [ tp ]
   start:
     description: "This command is used to toggle force starting of the game"
     usage: /<command>
@@ -24,15 +24,15 @@ commands:
   scenarios:
     description: "This command is used to view and toggle scenarios."
     usage: /<command>
-    aliases: [game, settings, uhc]
+    aliases: [ game, settings, uhc ]
   teaminventory:
     description: "This command is used to open team inventory."
     usage: /<command>
-    aliases: [ti, backpack, bp]
+    aliases: [ ti, backpack, bp ]
   hub:
     description: "This command is used to return back to the hub."
     usage: /<command>
-    aliases: [lobby, leave, spawn]
+    aliases: [ lobby, leave, spawn ]
   iteminfo:
     description: "This command is used to get the right item data for the config."
     usage: "/<command> while holding a item."
@@ -48,7 +48,7 @@ commands:
   crafts:
     description: "This command is used to open the custom crafting recipes menu"
     usage: /<command>
-    aliases: [craft, recipe, recipes]
+    aliases: [ craft, recipe, recipes ]
   top:
     description: "This command teleports players to the highest block above their head"
     usage: /<command>

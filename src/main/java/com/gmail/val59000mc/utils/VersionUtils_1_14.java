@@ -8,19 +8,19 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.player.PlayerPortalEvent;
 
-public class VersionUtils_1_14 extends VersionUtils_1_13{
+public class VersionUtils_1_14 extends VersionUtils_1_13 {
 
     @Override
-    public void handleNetherPortalEvent(PlayerPortalEvent event){
+    public void handleNetherPortalEvent(PlayerPortalEvent event) {
         Location loc = event.getFrom();
         MainConfiguration cfg = GameManager.getGameManager().getConfiguration();
 
-        if (event.getFrom().getWorld().getEnvironment() == World.Environment.NETHER){
+        if (event.getFrom().getWorld().getEnvironment() == World.Environment.NETHER) {
             loc.setWorld(Bukkit.getWorld(cfg.getOverworldUuid()));
             loc.setX(loc.getX() * 2d);
             loc.setZ(loc.getZ() * 2d);
             event.setTo(loc);
-        }else{
+        } else {
             loc.setWorld(Bukkit.getWorld(cfg.getNetherUuid()));
             loc.setX(loc.getX() / 2d);
             loc.setZ(loc.getZ() / 2d);
@@ -29,7 +29,7 @@ public class VersionUtils_1_14 extends VersionUtils_1_13{
     }
 
     @Override
-    public void replaceOceanBiomes(){
+    public void replaceOceanBiomes() {
         BiomeMapping.replaceBiomes(BiomeMapping.Biome.OCEAN, BiomeMapping.Biome.PLAINS);
         BiomeMapping.replaceBiomes(BiomeMapping.Biome.DEEP_OCEAN, BiomeMapping.Biome.FOREST);
         BiomeMapping.replaceBiomes(BiomeMapping.Biome.FROZEN_OCEAN, BiomeMapping.Biome.PLAINS);

@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
-public enum Scenario{
+public enum Scenario {
     CUTCLEAN(UniversalMaterial.IRON_INGOT, CutCleanListener.class),
     FIRELESS(UniversalMaterial.LAVA_BUCKET, FirelessListener.class),
     BOWLESS(UniversalMaterial.BOW, BowlessListener.class),
@@ -62,24 +62,34 @@ public enum Scenario{
     NINESLOTS(UniversalMaterial.BARRIER, NineSlotsListener.class),
     NETHERSTART(UniversalMaterial.LAVA_BUCKET, NetherStartListener.class);
 
-    private String name;
     private final UniversalMaterial material;
     private final Class<? extends ScenarioListener> listener;
     private final int fromVersion;
+    private String name;
     private List<String> description;
 
-    Scenario(UniversalMaterial material){
+    Scenario(UniversalMaterial material) {
         this(material, null);
     }
 
-    Scenario(UniversalMaterial material, Class<? extends ScenarioListener> listener){
+    Scenario(UniversalMaterial material, Class<? extends ScenarioListener> listener) {
         this(material, listener, 8);
     }
 
-    Scenario(UniversalMaterial material, Class<? extends ScenarioListener> listener, int fromVersion){
+    Scenario(UniversalMaterial material, Class<? extends ScenarioListener> listener, int fromVersion) {
         this.material = material;
         this.listener = listener;
         this.fromVersion = fromVersion;
+    }
+
+    public static Scenario getScenario(String s) {
+
+        for (Scenario scenario : values()) {
+            if (scenario.equals(s)) {
+                return scenario;
+            }
+        }
+        return null;
     }
 
     public String getName() {
@@ -98,7 +108,7 @@ public enum Scenario{
         this.description = description;
     }
 
-    public String getLowerCase(){
+    public String getLowerCase() {
         return name().toLowerCase();
     }
 
@@ -111,21 +121,11 @@ public enum Scenario{
         return listener;
     }
 
-    public boolean equals(String name){
+    public boolean equals(String name) {
         return name.contains(getName()) || name.replace(" ", "").toLowerCase().equals(name().toLowerCase());
     }
 
-    public static Scenario getScenario(String s){
-
-        for (Scenario scenario : values()){
-            if (scenario.equals(s)){
-                return scenario;
-            }
-        }
-        return null;
-    }
-
-    public ItemStack getScenarioItem(){
+    public ItemStack getScenarioItem() {
         ItemStack item = material.getStack();
         ItemMeta meta = item.getItemMeta();
 
@@ -137,7 +137,7 @@ public enum Scenario{
         return item;
     }
 
-    public boolean isCompatibleWithVersion(){
+    public boolean isCompatibleWithVersion() {
         return fromVersion <= UhcCore.getVersion();
     }
 

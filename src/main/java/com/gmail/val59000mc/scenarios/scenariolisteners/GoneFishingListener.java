@@ -12,15 +12,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class GoneFishingListener extends ScenarioListener{
+public class GoneFishingListener extends ScenarioListener {
 
     @Option(key = "lure-enchantment-level")
-    private int lureLevel = 3;
+    private final int lureLevel = 3;
     @Option(key = "luck-enchantment-level")
-    private int luckLevel = 3;
+    private final int luckLevel = 3;
 
     @EventHandler
-    public void onGameStarted(UhcStartedEvent e){
+    public void onGameStarted(UhcStartedEvent e) {
         ItemStack rod = new ItemStack(Material.FISHING_ROD);
         rod.addUnsafeEnchantment(Enchantment.LURE, lureLevel);
         rod.addUnsafeEnchantment(Enchantment.LUCK, luckLevel);
@@ -31,7 +31,7 @@ public class GoneFishingListener extends ScenarioListener{
 
         ItemStack anvils = new ItemStack(Material.ANVIL, 64);
 
-        for (UhcPlayer uhcPlayer : e.getPlayersManager().getOnlinePlayingPlayers()){
+        for (UhcPlayer uhcPlayer : e.getPlayersManager().getOnlinePlayingPlayers()) {
             try {
                 // Give the rod
                 uhcPlayer.getPlayer().getInventory().addItem(rod);
@@ -41,7 +41,7 @@ public class GoneFishingListener extends ScenarioListener{
 
                 // Give player 64 anvils
                 uhcPlayer.getPlayer().getInventory().addItem(anvils);
-            }catch (UhcPlayerNotOnlineException ex){
+            } catch (UhcPlayerNotOnlineException ex) {
                 // No rod for offline players
             }
         }

@@ -25,12 +25,12 @@ public class ScenarioManager {
     private static final int ROW = 9;
     private final Map<Scenario, ScenarioListener> activeScenarios;
 
-    public ScenarioManager(){
+    public ScenarioManager() {
         activeScenarios = new HashMap<>();
     }
 
-    public void addScenario(Scenario scenario){
-        if (isActivated(scenario)){
+    public void addScenario(Scenario scenario) {
+        if (isActivated(scenario)) {
             return;
         }
 
@@ -53,12 +53,12 @@ public class ScenarioManager {
                     Bukkit.getServer().getPluginManager().registerEvents(scenarioListener, UhcCore.getPlugin());
                 }
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    public void removeScenario(Scenario scenario){
+    public void removeScenario(Scenario scenario) {
         ScenarioListener scenarioListener = activeScenarios.get(scenario);
         activeScenarios.remove(scenario);
 
@@ -68,8 +68,8 @@ public class ScenarioManager {
         }
     }
 
-    public boolean toggleScenario(Scenario scenario){
-        if (isActivated(scenario)){
+    public boolean toggleScenario(Scenario scenario) {
+        if (isActivated(scenario)) {
             removeScenario(scenario);
             return false;
         }
@@ -78,21 +78,21 @@ public class ScenarioManager {
         return true;
     }
 
-    public synchronized Set<Scenario> getActiveScenarios(){
+    public synchronized Set<Scenario> getActiveScenarios() {
         return activeScenarios.keySet();
     }
 
-    public boolean isActivated(Scenario scenario){
+    public boolean isActivated(Scenario scenario) {
         return activeScenarios.containsKey(scenario);
     }
 
-    public ScenarioListener getScenarioListener(Scenario scenario){
+    public ScenarioListener getScenarioListener(Scenario scenario) {
         return activeScenarios.get(scenario);
     }
 
-    public Inventory getScenarioMainInventory(boolean editItem){
+    public Inventory getScenarioMainInventory(boolean editItem) {
 
-        Inventory inv = Bukkit.createInventory(null,3*ROW, Lang.SCENARIO_GLOBAL_INVENTORY);
+        Inventory inv = Bukkit.createInventory(null, 3 * ROW, Lang.SCENARIO_GLOBAL_INVENTORY);
 
         for (Scenario scenario : getActiveScenarios()) {
             if (scenario.isCompatibleWithVersion()) {
@@ -100,36 +100,36 @@ public class ScenarioManager {
             }
         }
 
-        if (editItem){
+        if (editItem) {
             // add edit item
             ItemStack edit = new ItemStack(Material.BARRIER);
             ItemMeta itemMeta = edit.getItemMeta();
             itemMeta.setDisplayName(Lang.SCENARIO_GLOBAL_ITEM_EDIT);
             edit.setItemMeta(itemMeta);
 
-            inv.setItem(26,edit);
+            inv.setItem(26, edit);
         }
         return inv;
     }
 
-    public Inventory getScenarioEditInventory(){
+    public Inventory getScenarioEditInventory() {
 
-        Inventory inv = Bukkit.createInventory(null,6*ROW, Lang.SCENARIO_GLOBAL_INVENTORY_EDIT);
+        Inventory inv = Bukkit.createInventory(null, 6 * ROW, Lang.SCENARIO_GLOBAL_INVENTORY_EDIT);
 
         // add edit item
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta itemMeta = back.getItemMeta();
         itemMeta.setDisplayName(Lang.SCENARIO_GLOBAL_ITEM_BACK);
         back.setItemMeta(itemMeta);
-        inv.setItem(5*ROW+8,back);
+        inv.setItem(5 * ROW + 8, back);
 
-        for (Scenario scenario : Scenario.values()){
-            if (!scenario.isCompatibleWithVersion()){
+        for (Scenario scenario : Scenario.values()) {
+            if (!scenario.isCompatibleWithVersion()) {
                 continue;
             }
 
             ItemStack scenarioItem = scenario.getScenarioItem();
-            if (isActivated(scenario)){
+            if (isActivated(scenario)) {
                 scenarioItem.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
                 scenarioItem.setAmount(2);
             }
@@ -139,14 +139,14 @@ public class ScenarioManager {
         return inv;
     }
 
-    public Inventory getScenarioVoteInventory(UhcPlayer uhcPlayer){
+    public Inventory getScenarioVoteInventory(UhcPlayer uhcPlayer) {
         Set<Scenario> playerVotes = uhcPlayer.getScenarioVotes();
         Set<Scenario> blacklist = GameManager.getGameManager().getConfiguration().getScenarioBlackList();
-        Inventory inv = Bukkit.createInventory(null,5*ROW, Lang.SCENARIO_GLOBAL_INVENTORY_VOTE);
+        Inventory inv = Bukkit.createInventory(null, 5 * ROW, Lang.SCENARIO_GLOBAL_INVENTORY_VOTE);
 
-        for (Scenario scenario : Scenario.values()){
+        for (Scenario scenario : Scenario.values()) {
             // Don't add to menu when blacklisted / not compatible / already enabled.
-            if (blacklist.contains(scenario) || !scenario.isCompatibleWithVersion() || isActivated(scenario)){
+            if (blacklist.contains(scenario) || !scenario.isCompatibleWithVersion() || isActivated(scenario)) {
                 continue;
             }
 
@@ -161,43 +161,43 @@ public class ScenarioManager {
         return inv;
     }
 
-    public void disableAllScenarios(){
+    public void disableAllScenarios() {
         Set<Scenario> active = new HashSet<>(getActiveScenarios());
-        for (Scenario scenario : active){
+        for (Scenario scenario : active) {
             removeScenario(scenario);
         }
     }
 
-    public void countVotes(){
+    public void countVotes() {
         Map<Scenario, Integer> votes = new HashMap<>();
 
         Set<Scenario> blacklist = GameManager.getGameManager().getConfiguration().getScenarioBlackList();
-        for (Scenario scenario : Scenario.values()){
+        for (Scenario scenario : Scenario.values()) {
             if (!blacklist.contains(scenario)) {
                 votes.put(scenario, 0);
             }
         }
 
-        for (UhcPlayer uhcPlayer : GameManager.getGameManager().getPlayersManager().getPlayersList()){
-            for (Scenario scenario : uhcPlayer.getScenarioVotes()){
+        for (UhcPlayer uhcPlayer : GameManager.getGameManager().getPlayersManager().getPlayersList()) {
+            for (Scenario scenario : uhcPlayer.getScenarioVotes()) {
                 int totalVotes = votes.get(scenario) + 1;
                 votes.put(scenario, totalVotes);
             }
         }
 
         int scenarioCount = GameManager.getGameManager().getConfiguration().getElectedScenaroCount();
-        while (scenarioCount > 0){
+        while (scenarioCount > 0) {
             // get scenario with most votes
             Scenario scenario = null;
             int scenarioVotes = 0;
 
-            for (Scenario s : votes.keySet()){
+            for (Scenario s : votes.keySet()) {
                 // Don't let people vote for scenarios that are enabled by default.
-                if (isActivated(s)){
+                if (isActivated(s)) {
                     continue;
                 }
 
-                if (scenario == null || votes.get(s) > scenarioVotes){
+                if (scenario == null || votes.get(s) > scenarioVotes) {
                     scenario = s;
                     scenarioVotes = votes.get(s);
                 }
@@ -209,23 +209,23 @@ public class ScenarioManager {
         }
     }
 
-    private void loadScenarioOptions(Scenario scenario, ScenarioListener listener) throws ReflectiveOperationException, IOException, InvalidConfigurationException{
+    private void loadScenarioOptions(Scenario scenario, ScenarioListener listener) throws ReflectiveOperationException, IOException, InvalidConfigurationException {
         List<Field> optionFields = NMSUtils.getAnnotatedFields(listener.getClass(), Option.class);
 
-        if (optionFields.isEmpty()){
+        if (optionFields.isEmpty()) {
             return;
         }
 
         YamlFile cfg = FileUtils.saveResourceIfNotAvailable("scenarios.yml");
 
-        for (Field field : optionFields){
+        for (Field field : optionFields) {
             Option option = field.getAnnotation(Option.class);
             String key = option.key().isEmpty() ? field.getName() : option.key();
             Object value = cfg.get(scenario.name().toLowerCase() + "." + key, field.get(listener));
             field.set(listener, value);
         }
 
-        if (cfg.addedDefaultValues()){
+        if (cfg.addedDefaultValues()) {
             cfg.saveWithComments();
         }
     }

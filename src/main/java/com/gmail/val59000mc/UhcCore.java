@@ -1,9 +1,9 @@
 package com.gmail.val59000mc;
 
+import com.gmail.val59000mc.configuration.YamlFile;
 import com.gmail.val59000mc.game.GameManager;
 import com.gmail.val59000mc.scenarios.Scenario;
 import com.gmail.val59000mc.utils.FileUtils;
-import com.gmail.val59000mc.configuration.YamlFile;
 import com.gmail.val59000mc.utils.TimeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -15,164 +15,164 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UhcCore extends JavaPlugin{
+public class UhcCore extends JavaPlugin {
 
-	private static final int MIN_VERSION = 8;
-	private static final int MAX_VERSION = 17;
+    private static final int MIN_VERSION = 8;
+    private static final int MAX_VERSION = 17;
 
-	private static UhcCore pl;
-	private static int version;
-	private boolean bStats;
-	private GameManager gameManager;
-	private Updater updater;
+    private static UhcCore pl;
+    private static int version;
+    private boolean bStats;
+    private GameManager gameManager;
+    private Updater updater;
 
-	@Override
-	public void onEnable(){
-		pl = this;
+    public static int getVersion() {
+        return version;
+    }
 
-		loadServerVersion();
-		addBStats();
+    public static UhcCore getPlugin() {
+        return pl;
+    }
 
-		gameManager = new GameManager();
-		Bukkit.getScheduler().runTaskLater(this, () -> gameManager.loadNewGame(), 1);
+    public static boolean isSpigotServer() {
+        try {
+            Class.forName("net.md_5.bungee.api.chat.TextComponent");
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
 
-		updater = new Updater(this);
+    @Override
+    public void onEnable() {
+        pl = this;
 
-		// Delete files that are scheduled for deletion
-		FileUtils.removeScheduledDeletionFiles();
-	}
+        loadServerVersion();
+        addBStats();
 
-	// Load the Minecraft version.
-	private void loadServerVersion(){
-		String versionString = Bukkit.getBukkitVersion();
-		version = 0;
+        gameManager = new GameManager();
+        Bukkit.getScheduler().runTaskLater(this, () -> gameManager.loadNewGame(), 1);
 
-		for (int i = MIN_VERSION; i <= MAX_VERSION; i ++){
-			if (versionString.contains("1." + i)){
-				version = i;
-			}
-		}
+        updater = new Updater(this);
 
-		if (version == 0) {
-			version = MIN_VERSION;
-			Bukkit.getLogger().warning("[UhcCore] Failed to detect server version! " + versionString + "?");
-		}else {
-			Bukkit.getLogger().info("[UhcCore] 1." + version + " Server detected!");
-		}
-	}
+        // Delete files that are scheduled for deletion
+        FileUtils.removeScheduledDeletionFiles();
+    }
 
-	private void addBStats(){
-		Metrics metrics = new Metrics(this);
-		bStats = metrics.isEnabled();
+    // Load the Minecraft version.
+    private void loadServerVersion() {
+        String versionString = Bukkit.getBukkitVersion();
+        version = 0;
 
-		metrics.addCustomChart(new Metrics.SingleLineChart("game_count", () -> {
-			YamlFile storage = FileUtils.saveResourceIfNotAvailable("storage.yml", true);
+        for (int i = MIN_VERSION; i <= MAX_VERSION; i++) {
+            if (versionString.contains("1." + i)) {
+                version = i;
+            }
+        }
 
-			List<Long> games = storage.getLongList("games");
-			List<Long> recentGames = new ArrayList<>();
+        if (version == 0) {
+            version = MIN_VERSION;
+            Bukkit.getLogger().warning("[UhcCore] Failed to detect server version! " + versionString + "?");
+        } else {
+            Bukkit.getLogger().info("[UhcCore] 1." + version + " Server detected!");
+        }
+    }
 
-			for (long game : games){
-				if (game + TimeUtils.HOUR > System.currentTimeMillis()){
-					recentGames.add(game);
-				}
-			}
+    private void addBStats() {
+        Metrics metrics = new Metrics(this);
+        bStats = metrics.isEnabled();
 
-			storage.set("games", recentGames);
-			storage.save();
-			return recentGames.size();
-		}));
+        metrics.addCustomChart(new Metrics.SingleLineChart("game_count", () -> {
+            YamlFile storage = FileUtils.saveResourceIfNotAvailable("storage.yml", true);
 
-		metrics.addCustomChart(new Metrics.SimplePie("team_size", () -> String.valueOf(gameManager.getConfiguration().getMaxPlayersPerTeam())));
+            List<Long> games = storage.getLongList("games");
+            List<Long> recentGames = new ArrayList<>();
 
-		metrics.addCustomChart(new Metrics.SimplePie("nether", () -> (gameManager.getConfiguration().getEnableNether() ? "enabled" : "disabled")));
+            for (long game : games) {
+                if (game + TimeUtils.HOUR > System.currentTimeMillis()) {
+                    recentGames.add(game);
+                }
+            }
 
-		metrics.addCustomChart(new Metrics.AdvancedPie("scenarios", () -> {
-			Map<String, Integer> scenarios = new HashMap<>();
+            storage.set("games", recentGames);
+            storage.save();
+            return recentGames.size();
+        }));
 
-			for (Scenario scenario : gameManager.getScenarioManager().getActiveScenarios()){
-				scenarios.put(scenario.getName(), 1);
-			}
+        metrics.addCustomChart(new Metrics.SimplePie("team_size", () -> String.valueOf(gameManager.getConfiguration().getMaxPlayersPerTeam())));
 
-			return scenarios;
-		}));
+        metrics.addCustomChart(new Metrics.SimplePie("nether", () -> (gameManager.getConfiguration().getEnableNether() ? "enabled" : "disabled")));
 
-		metrics.addCustomChart(new Metrics.SimplePie("the_end", () -> (gameManager.getConfiguration().getEnableTheEnd() ? "enabled" : "disabled")));
+        metrics.addCustomChart(new Metrics.AdvancedPie("scenarios", () -> {
+            Map<String, Integer> scenarios = new HashMap<>();
 
-		metrics.addCustomChart(new Metrics.SimplePie("team_colors", () -> (gameManager.getConfiguration().getUseTeamColors() ? "enabled" : "disabled")));
+            for (Scenario scenario : gameManager.getScenarioManager().getActiveScenarios()) {
+                scenarios.put(scenario.getName(), 1);
+            }
 
-		metrics.addCustomChart(new Metrics.SimplePie("deathmatch", () -> {
-			if (!gameManager.getConfiguration().getEnableTimeLimit()){
-				return "No deathmatch";
-			}
+            return scenarios;
+        }));
 
-			if (gameManager.getArena().isUsed()){
-				return "Arena deathmatch";
-			}
+        metrics.addCustomChart(new Metrics.SimplePie("the_end", () -> (gameManager.getConfiguration().getEnableTheEnd() ? "enabled" : "disabled")));
 
-			return "Center deatchmatch";
-		}));
+        metrics.addCustomChart(new Metrics.SimplePie("team_colors", () -> (gameManager.getConfiguration().getUseTeamColors() ? "enabled" : "disabled")));
 
-		metrics.addCustomChart(new Metrics.SimplePie("auto_update", () -> (gameManager.getConfiguration().getEnableAutoUpdate() ? "enabled" : "disabled")));
+        metrics.addCustomChart(new Metrics.SimplePie("deathmatch", () -> {
+            if (!gameManager.getConfiguration().getEnableTimeLimit()) {
+                return "No deathmatch";
+            }
 
-		metrics.addCustomChart(new Metrics.SimplePie("replace_oceans", () -> (gameManager.getConfiguration().getReplaceOceanBiomes() ? "enabled" : "disabled")));
-	}
+            if (gameManager.getArena().isUsed()) {
+                return "Arena deathmatch";
+            }
 
-	// This collects the amount of games started. They are stored anonymously by https://bstats.org/ (If enabled)
-	public void addGameToStatistics(){
-		if (bStats){
-			YamlFile storage;
+            return "Center deatchmatch";
+        }));
 
-			try{
-				storage = FileUtils.saveResourceIfNotAvailable("storage.yml");
-			}catch (InvalidConfigurationException ex){
-				ex.printStackTrace();
-				return;
-			}
+        metrics.addCustomChart(new Metrics.SimplePie("auto_update", () -> (gameManager.getConfiguration().getEnableAutoUpdate() ? "enabled" : "disabled")));
 
-			List<Long> games = storage.getLongList("games");
-			List<Long> recentGames = new ArrayList<>();
+        metrics.addCustomChart(new Metrics.SimplePie("replace_oceans", () -> (gameManager.getConfiguration().getReplaceOceanBiomes() ? "enabled" : "disabled")));
+    }
 
-			for (long game : games){
-				if (game + TimeUtils.HOUR > System.currentTimeMillis()){
-					recentGames.add(game);
-				}
-			}
+    // This collects the amount of games started. They are stored anonymously by https://bstats.org/ (If enabled)
+    public void addGameToStatistics() {
+        if (bStats) {
+            YamlFile storage;
 
-			recentGames.add(System.currentTimeMillis());
+            try {
+                storage = FileUtils.saveResourceIfNotAvailable("storage.yml");
+            } catch (InvalidConfigurationException ex) {
+                ex.printStackTrace();
+                return;
+            }
 
-			storage.set("games", recentGames);
-			try {
-				storage.save();
-			}catch (IOException ex){
-				Bukkit.getLogger().warning("[UhcCore] Failed to save storage.yml file!");
-				ex.printStackTrace();
-			}
-		}
-	}
+            List<Long> games = storage.getLongList("games");
+            List<Long> recentGames = new ArrayList<>();
 
-	public static int getVersion() {
-		return version;
-	}
-	
-	public static UhcCore getPlugin(){
-		return pl;
-	}
+            for (long game : games) {
+                if (game + TimeUtils.HOUR > System.currentTimeMillis()) {
+                    recentGames.add(game);
+                }
+            }
 
-	public static boolean isSpigotServer(){
-		try {
-			Class.forName("net.md_5.bungee.api.chat.TextComponent");
-			return true;
-		}catch (ClassNotFoundException ex){
-			return false;
-		}
-	}
+            recentGames.add(System.currentTimeMillis());
 
-	@Override
-	public void onDisable(){
-		gameManager.getScenarioManager().disableAllScenarios();
-		
-		updater.runAutoUpdate();
-		Bukkit.getLogger().info("[UhcCore] Plugin disabled");
-	}
+            storage.set("games", recentGames);
+            try {
+                storage.save();
+            } catch (IOException ex) {
+                Bukkit.getLogger().warning("[UhcCore] Failed to save storage.yml file!");
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onDisable() {
+        gameManager.getScenarioManager().disableAllScenarios();
+
+        updater.runAutoUpdate();
+        Bukkit.getLogger().info("[UhcCore] Plugin disabled");
+    }
 
 }

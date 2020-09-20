@@ -12,52 +12,52 @@ import org.bukkit.entity.Player;
 import java.util.HashSet;
 import java.util.UUID;
 
-public class KillDisconnectedPlayerThread implements Runnable{
-	
-	private final UUID uuid;
-	private int timeLeft;
-	
-	public KillDisconnectedPlayerThread(UUID playerUuid, int maxDisconnectPlayersTime){
-		uuid = playerUuid;
-		timeLeft = maxDisconnectPlayersTime;
-	}
+public class KillDisconnectedPlayerThread implements Runnable {
 
-	@Override
-	public void run() {
-		GameManager gm = GameManager.getGameManager();
+    private final UUID uuid;
+    private int timeLeft;
 
-		if(!gm.getGameState().equals(GameState.PLAYING)) {
-			return;
-		}
+    public KillDisconnectedPlayerThread(UUID playerUuid, int maxDisconnectPlayersTime) {
+        uuid = playerUuid;
+        timeLeft = maxDisconnectPlayersTime;
+    }
 
-		Player player = Bukkit.getPlayer(uuid);
+    @Override
+    public void run() {
+        GameManager gm = GameManager.getGameManager();
 
-		if (player != null){
-			return; // Player is back online
-		}
+        if (!gm.getGameState().equals(GameState.PLAYING)) {
+            return;
+        }
 
-		if(timeLeft <= 0){
-			UhcPlayer uhcPlayer;
-			PlayersManager pm = gm.getPlayersManager();
-			try {
-				uhcPlayer = pm.getUhcPlayer(uuid);
-			} catch (UhcPlayerDoesntExistException e){
-				e.printStackTrace();
-				return;
-			}
+        Player player = Bukkit.getPlayer(uuid);
 
-			// If using offline zombies kill that zombie.
-			if (uhcPlayer.getOfflineZombie() != null){
-				pm.killOfflineUhcPlayer(uhcPlayer, uhcPlayer.getOfflineZombie().getLocation(), new HashSet<>(uhcPlayer.getStoredItems()), null);
-				uhcPlayer.getOfflineZombie().remove();
-				uhcPlayer.setOfflineZombie(null);
-			}else{
-				pm.killOfflineUhcPlayer(uhcPlayer, new HashSet<>());
-			}
-		}else{
-			timeLeft-=5;
-			Bukkit.getScheduler().scheduleSyncDelayedTask(UhcCore.getPlugin(), this, 100);
-		}
-	}
+        if (player != null) {
+            return; // Player is back online
+        }
+
+        if (timeLeft <= 0) {
+            UhcPlayer uhcPlayer;
+            PlayersManager pm = gm.getPlayersManager();
+            try {
+                uhcPlayer = pm.getUhcPlayer(uuid);
+            } catch (UhcPlayerDoesntExistException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            // If using offline zombies kill that zombie.
+            if (uhcPlayer.getOfflineZombie() != null) {
+                pm.killOfflineUhcPlayer(uhcPlayer, uhcPlayer.getOfflineZombie().getLocation(), new HashSet<>(uhcPlayer.getStoredItems()), null);
+                uhcPlayer.getOfflineZombie().remove();
+                uhcPlayer.setOfflineZombie(null);
+            } else {
+                pm.killOfflineUhcPlayer(uhcPlayer, new HashSet<>());
+            }
+        } else {
+            timeLeft -= 5;
+            Bukkit.getScheduler().scheduleSyncDelayedTask(UhcCore.getPlugin(), this, 100);
+        }
+    }
 
 }

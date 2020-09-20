@@ -130,7 +130,7 @@ customize-game-behavior:
       # The amount of scenarios with the most votes that will get added at the start of the game.
       elected-scenarios: 3
       # Black-list, scenarios under this list can not be voted for.
-      black-list: []
+      black-list: [ ]
 
 
   # Set it to false to stop ghasts from dropping ghast-tears

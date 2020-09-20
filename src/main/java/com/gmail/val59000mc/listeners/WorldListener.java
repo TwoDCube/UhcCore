@@ -11,19 +11,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldInitEvent;
 
-public class WorldListener implements Listener{
+public class WorldListener implements Listener {
 
     @EventHandler
-    public void onWorldInit(WorldInitEvent e){
+    public void onWorldInit(WorldInitEvent e) {
         World world = e.getWorld();
         MainConfiguration cfg = GameManager.getGameManager().getConfiguration();
-        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getEnableGenerateSugarcane()){
+        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getEnableGenerateSugarcane()) {
             world.getPopulators().add(new SurgarCanePopulator(cfg.getGenerateSugarcanePercentage()));
         }
-        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getReplaceOceanBiomes() && UhcCore.getVersion() >= 14){
+        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getReplaceOceanBiomes() && UhcCore.getVersion() >= 14) {
             world.getPopulators().add(new BiomeTypePopulator());
         }
-        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getCaveOresOnly()){
+        if (world.getName().equals(cfg.getOverworldUuid()) && cfg.getCaveOresOnly()) {
             world.getPopulators().add(new CaveOresOnlyPopulator());
         }
     }

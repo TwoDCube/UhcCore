@@ -7,38 +7,40 @@ import com.gmail.val59000mc.players.TeamManager;
 import com.gmail.val59000mc.scoreboard.ScoreboardManager;
 import org.bukkit.event.Listener;
 
-public abstract class ScenarioListener implements Listener{
+public abstract class ScenarioListener implements Listener {
 
-    public GameManager getGameManager(){
+    public GameManager getGameManager() {
         return GameManager.getGameManager();
     }
 
-    public PlayersManager getPlayersManager(){
+    public PlayersManager getPlayersManager() {
         return getGameManager().getPlayersManager();
     }
 
-    public TeamManager getTeamManager(){
+    public TeamManager getTeamManager() {
         return getGameManager().getTeamManager();
     }
 
-    public ScoreboardManager getScoreboardManager(){
+    public ScoreboardManager getScoreboardManager() {
         return getGameManager().getScoreboardManager();
     }
 
-    public ScenarioManager getScenarioManager(){
+    public ScenarioManager getScenarioManager() {
         return getGameManager().getScenarioManager();
     }
 
-    public MainConfiguration getConfiguration(){
+    public MainConfiguration getConfiguration() {
         return getGameManager().getConfiguration();
     }
 
-    public boolean isActivated(Scenario scenario){
+    public boolean isActivated(Scenario scenario) {
         return getScenarioManager().isActivated(scenario);
     }
 
-    public void onEnable(){}
+    public void onEnable() {
+    }
 
-    public void onDisable(){}
+    public void onDisable() {
+    }
 
 }
